@@ -1,16 +1,47 @@
-menu "Example Configuration"
+menu "ESP32-VFO Configuration"
+
+     config I2C_SCL_IO
+     	int "I2C SCL GPIO number"
+	default 0
+	help
+	    Defines the ESP32 GPIO pin number to drive I2C SCL signal.
+
+     config I2C_SDA_IO
+     	int "I2C SDA GPIO number"
+	default 1
+	help
+	    Defines the ESP32 GPIO pin number to drive I2C SDA signal.
+
+     config I2C_BUS_FREQ_HZ
+     	int "I2C bus frequency in Hz"
+	default 100000
+	help
+	    Defines the clock frequency for the I2C bus (in Hz).
+
+     config I2C_DEVICE_ADDRESS
+        hex "I2C bus address for target device"
+	default 0x60
+	help
+	    Defines the address of the target device on the I2C bus.
+
+     config LOCAL_HOSTNAME
+     	string "Host name we register on the network"
+	default "esp32-vfo"
+	help
+	    Defines a legal hostname to be registered with mdns on the
+	    network we provide or attach to.
 
     config ESP_WIFI_SSID
         string "SoftAP SSID"
-        default "esp32_ssid"
+        default "ESP32-VFO"
         help
             SSID (network name) to set up the softAP with.
 
     config ESP_WIFI_PASSWORD
         string "SoftAP Password"
-        default "esp32_pwd"
+        default "0sekret!"
         help
-            WiFi password (WPA or WPA2) for the example to use for the softAP.
+            WiFi password (WPA or WPA2) to use for the softAP.
 
     config ESP_MAX_STA_CONN
         int "Maximal STA connections"
@@ -23,4 +54,22 @@ menu "Example Configuration"
         default y
         help
             Enables more modern DHCP-based Option 114 to provide clients with the captive portal URI
+
+    config CONSOLE_STORE_HISTORY
+        bool "Store command history in flash"
+        default y
+        help
+            Linenoise line editing library provides functions to save and load
+            command history. If this option is enabled, initializes a FAT filesystem
+            and uses it to store command history.
+
+    config CONSOLE_IGNORE_EMPTY_LINES
+        bool "Ignore empty lines inserted into the console"
+        default y
+        help
+            If an empty line is inserted to the console, the Console
+            can either ignore empty lines (simply continue), or break
+            on empty lines (stop after an empty line).
+
 endmenu
+
