@@ -1,4 +1,4 @@
-menu "ESP32-VFO Configuration"
+menu "SignalGen Configuration"
 
      config I2C_SCL_IO
      	int "I2C SCL GPIO number"
@@ -26,14 +26,14 @@ menu "ESP32-VFO Configuration"
 
      config LOCAL_HOSTNAME
      	string "Host name we register on the network"
-	default "esp32-vfo"
+	default "signalgen"
 	help
 	    Defines a legal hostname to be registered with mdns on the
 	    network we provide or attach to.
 
     config ESP_WIFI_SSID
         string "SoftAP SSID"
-        default "ESP32-VFO"
+        default "SignalGen"
         help
             SSID (network name) to set up the softAP with.
 

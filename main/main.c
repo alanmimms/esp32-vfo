@@ -1,4 +1,4 @@
-/* ESP32-VFO
+/* SIGNALGEN
 
    Unless required by applicable law or agreed to in writing, this
    software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
@@ -35,14 +35,14 @@
 #include "esp_http_server.h"
 #include "dns_server.h"
 
-#define ESP32VFO_ESP_WIFI_SSID CONFIG_ESP_WIFI_SSID
-#define ESP32VFO_ESP_WIFI_PASS CONFIG_ESP_WIFI_PASSWORD
-#define ESP32VFO_MAX_STA_CONN CONFIG_ESP_MAX_STA_CONN
+#define SIGNALGEN_ESP_WIFI_SSID CONFIG_ESP_WIFI_SSID
+#define SIGNALGEN_ESP_WIFI_PASS CONFIG_ESP_WIFI_PASSWORD
+#define SIGNALGEN_MAX_STA_CONN CONFIG_ESP_MAX_STA_CONN
 
 extern const char root_start[] asm("_binary_root_html_start");
 extern const char root_end[] asm("_binary_root_html_end");
 
-static const char *TAG = "esp32-vfo";
+static const char *TAG = "SignalGen";
 
 
 
@@ -57,7 +57,7 @@ static const char *TAG = "esp32-vfo";
 #endif
 #endif
 
-#define PROMPT_STR CONFIG_IDF_TARGET
+#define PROMPT_STR "SignalGen"
 
 /* Console command history can be stored to and loaded from a file.
  * The easiest way to do this is to use FATFS filesystem on top of
@@ -124,15 +124,15 @@ static void wifi_init_softap(void)
 
   static wifi_config_t wifi_config = {
     .ap = {
-      .ssid = ESP32VFO_ESP_WIFI_SSID,
-      .ssid_len = strlen(ESP32VFO_ESP_WIFI_SSID),
-      .password = ESP32VFO_ESP_WIFI_PASS,
-      .max_connection = ESP32VFO_MAX_STA_CONN,
+      .ssid = SIGNALGEN_ESP_WIFI_SSID,
+      .ssid_len = strlen(SIGNALGEN_ESP_WIFI_SSID),
+      .password = SIGNALGEN_ESP_WIFI_PASS,
+      .max_connection = SIGNALGEN_MAX_STA_CONN,
       .authmode = WIFI_AUTH_WPA_WPA2_PSK
     },
   };
 
-  if (ESP32VFO_ESP_WIFI_PASS[0] == 0) wifi_config.ap.authmode = WIFI_AUTH_OPEN;
+  if (SIGNALGEN_ESP_WIFI_PASS[0] == 0) wifi_config.ap.authmode = WIFI_AUTH_OPEN;
 
   ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));
   ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_AP, &wifi_config));
@@ -146,7 +146,7 @@ static void wifi_init_softap(void)
   ESP_LOGI(TAG, "Set up softAP with IP: %s", ip_addr);
 
   ESP_LOGI(TAG, "wifi_init_softap finished. SSID:'%s' password:'%s'",
-	   ESP32VFO_ESP_WIFI_SSID, ESP32VFO_ESP_WIFI_PASS);
+	   SIGNALGEN_ESP_WIFI_SSID, SIGNALGEN_ESP_WIFI_PASS);
 }
 
 #ifdef CONFIG_ESP_ENABLE_DHCP_CAPTIVEPORTAL
@@ -262,7 +262,7 @@ void app_main(void)
   /* Prompt to be printed before each line.
    * This can be customized, made dynamic, etc.
    */
-  const char *prompt = setup_prompt(PROMPT_STR ">");
+  const char *prompt = setup_prompt(PROMPT_STR "> ");
 
   /*
     Turn of warnings from HTTP server as redirecting traffic will yield
@@ -303,7 +303,6 @@ void app_main(void)
   dns_server_config_t config = DNS_SERVER_CONFIG_SINGLE("*" /* all A queries */, "WIFI_AP_DEF" /* softAP netif ID */);
   start_dns_server(&config);
 
-
   /* Register commands */
   esp_console_register_help_command();
   register_system_common();
@@ -328,7 +327,7 @@ void app_main(void)
     printf("\n"
 	   "Your terminal application does not support escape sequences.\n"
 	   "Line editing and history features are disabled.\n"
-	   "On Windows, try using Putty instead.\n");
+	   "On Windows or Linux, try using 'putty'.\n");
   }
 
   /* Main loop */
