@@ -24,29 +24,12 @@
 #include "freertos/FreeRTOS.h"
 
 static const char *TAG = "cmd_i2c";
-static i2c_master_dev_handle_t devH = 0;
+extern i2c_master_dev_handle_t i2cDevH;
 
 static void registerDUMP(void);
 
 
 void register_i2c(void) {
-  static i2c_master_bus_config_t busConfig = {
-    .i2c_port = 0,
-    .scl_io_num = CONFIG_I2C_SCL_IO,
-    .sda_io_num = CONFIG_I2C_SDA_IO,
-    .clk_source = I2C_CLK_SRC_DEFAULT,
-    .glitch_ignore_cnt = 7,
-    .flags.enable_internal_pullup = true,
-  };
-  i2c_master_bus_handle_t busH = 0;
-  ESP_ERROR_CHECK(i2c_new_master_bus(&busConfig, &busH));
-
-  static i2c_device_config_t devConfig = {
-    .dev_addr_length = I2C_ADDR_BIT_LEN_7,
-    .device_address = CONFIG_I2C_DEVICE_ADDRESS,
-    .scl_speed_hz = CONFIG_I2C_BUS_FREQ_HZ,
-  };
-  ESP_ERROR_CHECK(i2c_master_bus_add_device(busH, &devConfig, &devH));
   registerDUMP();
 }
 
