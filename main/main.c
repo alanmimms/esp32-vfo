@@ -5,6 +5,12 @@
    CONDITIONS OF ANY KIND, either express or implied.
 */
 
+/* TODO
+ *
+ * - Correctly implement switching between AP and STA WiFi mode
+     (https://esp32.com/viewtopic.php?t=22486).
+ */
+
 #include <sys/param.h>
 #include <stdio.h>
 #include <string.h>
@@ -41,6 +47,8 @@
 
 extern const char root_start[] asm("_binary_root_html_start");
 extern const char root_end[] asm("_binary_root_html_end");
+
+i2c_master_dev_handle_t i2cDevH;
 
 static const char *TAG = "SignalGen";
 
@@ -242,6 +250,28 @@ static void start_mdns_service() {
 }
 
 
+static void initI2C(void) {
+  static i2c_master_bus_config_t busConfig = {
+    .i2c_port = 0,
+    .scl_io_num = CONFIG_I2C_SCL_IO,
+    .sda_io_num = CONFIG_I2C_SDA_IO,
+    .clk_source = I2C_CLK_SRC_DEFAULT,
+    .glitch_ignore_cnt = 7,
+    .flags.enable_internal_pullup = true,
+  };
+  i2c_master_bus_handle_t busH = 0;
+  ESP_ERROR_CHECK(i2c_new_master_bus(&busConfig, &busH));
+
+  static i2c_device_config_t devConfig = {
+    .dev_addr_length = I2C_ADDR_BIT_LEN_7,
+    .device_address = CONFIG_I2C_DEVICE_ADDRESS,
+    .scl_speed_hz = CONFIG_I2C_BUS_FREQ_HZ,
+  };
+  ESP_ERROR_CHECK(i2c_master_bus_add_device(busH, &devConfig, &i2cDevH));
+}
+
+
+
 void app_main(void)
 {
   initialize_nvs();
@@ -302,6 +332,9 @@ void app_main(void)
   // Start the DNS server that will redirect all queries to the softAP IP
   dns_server_config_t config = DNS_SERVER_CONFIG_SINGLE("*" /* all A queries */, "WIFI_AP_DEF" /* softAP netif ID */);
   start_dns_server(&config);
+
+  // Initialize I2C
+  initI2C();
 
   /* Register commands */
   esp_console_register_help_command();
