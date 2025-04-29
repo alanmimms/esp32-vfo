@@ -24,10 +24,12 @@
 #include "nvs.h"
 #include "nvs_flash.h"
 #include "soc/soc_caps.h"
+#include "driver/i2c_master.h"
 #include "cmd_system.h"
 #include "cmd_wifi.h"
 #include "cmd_nvs.h"
 #include "cmd_i2c.h"
+#include "cmd_freq.h"
 #include "console_settings.h"
 
 #include "esp_event.h"
@@ -350,6 +352,7 @@ void app_main(void)
 #endif
   register_nvs();
   register_i2c();
+  registerFREQ();
 
   printf("\n"
 	 "Type 'help' to get the list of commands.\n"

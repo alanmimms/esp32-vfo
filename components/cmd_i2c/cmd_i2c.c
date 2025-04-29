@@ -39,7 +39,7 @@ static int dumpI2C(int argc, char **argv) {
   uint8_t startRegN = 0;
   uint8_t regs[256];
   memset(regs, 0xFF, sizeof(regs));
-  i2c_master_transmit_receive(devH, &startRegN, 1, regs, sizeof(regs), 1000 / portTICK_PERIOD_MS);
+  i2c_master_transmit_receive(i2cDevH, &startRegN, 1, regs, sizeof(regs), 1000 / portTICK_PERIOD_MS);
   
   printf("\n%s SI5351 Registers:", TAG);
 

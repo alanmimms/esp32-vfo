@@ -39,7 +39,7 @@ menu "SignalGen Configuration"
 
     config ESP_WIFI_PASSWORD
         string "SoftAP Password"
-        default "0sekret!"
+        default "Sekret!0"
         help
             WiFi password (WPA or WPA2) to use for the softAP.
 

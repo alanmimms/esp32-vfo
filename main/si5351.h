@@ -21,6 +21,6 @@ void SI5351SetFreq(uint8_t clkNumber, uint32_t f);
 
 // Set clk0 and clk1 frequency in quadrature to f01 Hz.
 // Reverse I/Q if invertPhase.
-void SI5351SetFreqQuadrature(uint32_t f01, bool invertPhase = false);
+void SI5351SetFreqQuadrature(uint32_t f01, bool invertPhase);
 
 #endif // __SI5351_H__
