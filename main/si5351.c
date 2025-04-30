@@ -208,6 +208,12 @@ static uint8_t readReg(uint8_t regAddr) {
 }
 
 
+// Reset both PLLs
+static void resetPLLs() {
+  writeReg(REG_PLL_RESET, PLLA_RST_BIT | PLLB_RST_BIT);
+}
+
+
 // Calculate and write Multisynth parameters P1, P2, P3 to registers.
 // This function handles the encoding based on AN619 formulas.
 // For integer mode (b=0, c=1), set p2=0, p3=1.
@@ -233,6 +239,7 @@ static void setMSynthParams(uint8_t synthBase,
 
   writeRegs(synthBase, params, 8);
 }
+
 
 // Configure a Multisynth for fractional division a + b/c.
 // Calculates P1, P2, P3 and calls setMSynthParams.
@@ -328,6 +335,8 @@ static void configurePLL(uint8_t pllBase, uint32_t vcoFreq) {
     writeReg(ctrlRegAddr, ctrlVal);
     setMSynthFrac(pllBase, a, b, c, R_DIV_1); // PLL rDiv is always 1
   }
+
+  resetPLLs();			/* XXX big hammer for now */
 }
 
 // Configure an output stage (Multisynth, R divider, Clock Control)
@@ -487,8 +496,10 @@ void SI5351Init() {
   // Enable XO and MS fanout buffers (important!)
   writeReg(REG_FANOUT_ENABLE, XO_FANOUT_EN_BIT | MS_FANOUT_EN_BIT); // Enable XO and MS fanout
 
-  // Reset both PLLs
-  writeReg(REG_PLL_RESET, PLLA_RST_BIT | PLLB_RST_BIT);
+  // Disable OEB pin enable for all clocks.
+  writeReg(REG_OEB_PIN_DISABLE, 0x00);
+
+  resetPLLs();
 
   // Clear output disable register (outputs still off due to PDN bit)
   // Outputs will be enabled one by one in configureOutputSynth
@@ -624,4 +635,6 @@ void SI5351SetFreqQuadrature(uint32_t f01, bool invertPhase) {
   ctrl1 &= ~MS_INT; // Clear integer mode bit
   writeReg(REG_CLK0_CONTROL, ctrl0);
   writeReg(REG_CLK1_CONTROL, ctrl1);
+
+  resetPLLs();			/* XXX big hammer for now */
 }

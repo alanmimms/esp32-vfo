@@ -22,7 +22,7 @@ static struct {
 
 void registerFREQ(void) {
   args.freqP = arg_int1(NULL, NULL, "<freq>", "Clock frequency, Hz");
-  args.clkP = arg_int0(NULL, NULL, "<clk number>", "Clock output number to change");
+  args.clkP = arg_int1(NULL, NULL, "<clk number>", "Clock output number to change");
   args.endP = arg_end(5);
 
   const esp_console_cmd_t cmd = {
@@ -46,5 +46,7 @@ static int freqHandler(int argc, char **argv) {
   }
 
   printf("%s: freq=%d clk=%d\n", TAG, args.freqP->ival[0], args.clkP->ival[0]);
+  SI5351SetFreq(args.clkP->ival[0], args.freqP->ival[0]);
+  SI5351SetDrive(args.clkP->ival[0], SI5351CLK_8MA);
   return 0;
 }
