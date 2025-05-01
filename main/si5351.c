@@ -67,10 +67,10 @@ enum {
 
 // Register 3: Output Enable Control
 // Macro still useful here as it depends on clock number 'n'
-#define CLK_OEB(n) (1 << (n))
+#define CLK_OEB(n) (1u << (n))
 
 // Register 15: PLL Input Source
-enum { // Anonymous enum for constants
+enum {
   PLLA_SRC_XTAL   = (0 << 2),
   PLLA_SRC_CLKIN  = (1 << 2),
   PLLB_SRC_XTAL   = (0 << 3),
@@ -79,12 +79,12 @@ enum { // Anonymous enum for constants
   CLKIN_DIV_2     = (1 << 6),
   CLKIN_DIV_4     = (2 << 6),
   CLKIN_DIV_8     = (3 << 6)
-}; // No typedef, no name needed
+};
 
 // Register 16-23: CLKx Control
 #define CLK_IDRV_MASK   0x03
 #define CLK_SRC_MASK    (0x03 << 2)
-enum { // Anonymous enum for constants
+enum {
   // Drive Strength (Bits 1:0)
   CLK_IDRV_2MA    = 0x00,
   CLK_IDRV_4MA    = 0x01,
@@ -107,63 +107,63 @@ enum { // Anonymous enum for constants
   FBB_INT         = (1 << 6),    // Integer mode for PLLB (Reg 23)
   // Power Down (Bit 7)
   CLK_PDN         = (1 << 7)
-}; // No typedef, no name needed
+};
 
-// Register 44, 52, 60, 68, 76, 84: Multisynth x Parameters (P1[17:16], DIVBY4, R_DIV)
+// Register 44, 52, 60, 68, 76, 84: Multisynth x Parameters (P1[17:16], DIVBY4, RDIV)
 #define MS_P1_HIGH_MASK 0x03        // Mask for bits 1:0 (P1[17:16])
 #define MS_DIVBY4_MASK  (0x03 << 2) // Mask for bits 3:2 (DIVBY4)
-#define R_DIV_MASK      (0x07 << 4) // Mask for bits 6:4 (R_DIV)
-#define R_DIV_SHIFT     4           // Shift amount for R_DIV field
-enum { // Anonymous enum for constants
+#define RDIV_MASK       (0x07 << 4) // Mask for bits 6:4 (RDIV)
+#define RDIV_SHIFT      4           // Shift amount for RDIV field
+enum {
   // DIVBY4 Enable (Bits 3:2)
   MS_DIVBY4_ON    = (0x03 << 2),
   MS_DIVBY4_OFF   = (0x00 << 2), // Explicitly define off state if needed
   // R Divider (Bits 6:4) - Values include the shift
-  R_DIV_1         = (0 << R_DIV_SHIFT),
-  R_DIV_2         = (1 << R_DIV_SHIFT),
-  R_DIV_4         = (2 << R_DIV_SHIFT),
-  R_DIV_8         = (3 << R_DIV_SHIFT),
-  R_DIV_16        = (4 << R_DIV_SHIFT),
-  R_DIV_32        = (5 << R_DIV_SHIFT),
-  R_DIV_64        = (6 << R_DIV_SHIFT),
-  R_DIV_128       = (7 << R_DIV_SHIFT)
-}; // No typedef, no name needed
+  RDIV_1         = (0 << RDIV_SHIFT),
+  RDIV_2         = (1 << RDIV_SHIFT),
+  RDIV_4         = (2 << RDIV_SHIFT),
+  RDIV_8         = (3 << RDIV_SHIFT),
+  RDIV_16        = (4 << RDIV_SHIFT),
+  RDIV_32        = (5 << RDIV_SHIFT),
+  RDIV_64        = (6 << RDIV_SHIFT),
+  RDIV_128       = (7 << RDIV_SHIFT)
+};
 
 // Register 177: PLL Reset
-enum { // Anonymous enum for constants
+enum {
   PLLA_RST_BIT    = (1 << 5),
   PLLB_RST_BIT    = (1 << 7)
-}; // No typedef, no name needed
+};
 
 // Register 183: Crystal Load Capacitance
-#define XTAL_CL_MASK    (0x03 << 6) // Mask for bits 7:6
-enum { // Anonymous enum for constants
+#define XTAL_CL_MASK    (0x03 << 6)
+enum {
   XTAL_CL_6PF     = (1 << 6),
   XTAL_CL_8PF     = (2 << 6),
   XTAL_CL_10PF    = (3 << 6) // Default
-}; // No typedef, no name needed
+};
 
 // Register 187: Fanout Enable
-enum { // Anonymous enum for constants
+enum {
   MS_FANOUT_EN_BIT    = (1 << 4),
   XO_FANOUT_EN_BIT    = (1 << 6),
   CLKIN_FANOUT_EN_BIT = (1 << 7)
-}; // No typedef, no name needed
+};
 
 
 // --- Static Helper Functions ---
 
 // Return log base 2 of n where n is a power of 2 from 1 to 128.
-// Returns the R_DIV encoded value (already shifted).
+// Returns the already shifted RDIV encoded value.
 static uint8_t getRDivEncoding(uint8_t n) {
-  if (n == 0) return R_DIV_1; // Should not happen, treat as div by 1
-  uint8_t rval = 0;
-  while (n > 1) {
-    n >>= 1;
-    rval++;
-  }
+
+  if (n == 0) return RDIV_1; // Should not happen, treat as div by 1
+
+  uint8_t rval;
+  for (rval = 0; n > 1; ++rval) n >>= 1;
+
   // Return the shifted value directly as uint8_t
-  return (rval << R_DIV_SHIFT);
+  return (rval << RDIV_SHIFT);
 }
 
 // Write len bytes from bufP to consecutive registers starting at regBase.
@@ -218,7 +218,6 @@ static void resetPLLs() {
 // This function handles the encoding based on AN619 formulas.
 // For integer mode (b=0, c=1), set p2=0, p3=1.
 // For divide-by-4 mode, set p1=0, p2=0, p3=1 and ensure divBy4 is true.
-// 'rDivEncoded' parameter is now uint8_t
 static void setMSynthParams(uint8_t synthBase,
 			    uint32_t p1, uint32_t p2, uint32_t p3,
 			    uint8_t rDivEncoded, bool divBy4)
@@ -226,7 +225,7 @@ static void setMSynthParams(uint8_t synthBase,
   uint8_t params[8] = {
     (p3 >> 8) & 0xFF,		// MSx_P3[15:8]
     p3 & 0xFF,			// MSx_P3[7:0]
-    rDivEncoded |				 // R_DIV[2:0]
+    rDivEncoded |				 // RDIV[2:0]
         ((p1 >> 16) & MS_P1_HIGH_MASK) |	 // MSx_DIVBY4[1:0]
         (divBy4 ? MS_DIVBY4_ON : MS_DIVBY4_OFF), // MSx_P1[17:16]
     (p1 >> 8) & 0xFF,		// MSx_P1[15:8]
@@ -267,7 +266,6 @@ static void setMSynthFrac(uint8_t synthBase, uint32_t a, uint32_t b, uint32_t c,
     p3 = c;
   }
 
-  // Ensure parameters are within valid range (P1: 18-bit, P2/P3: 20-bit)
   p1 &= 0x3FFFF;
   p2 &= 0xFFFFF;
   p3 &= 0xFFFFF;
@@ -291,7 +289,6 @@ static void setMSynthInt(uint8_t synthBase, uint32_t div, uint8_t rDivEncoded) {
     p1 = 128 * div - 512;
   }
 
-  // Ensure parameters are within valid range
   p1 &= 0x3FFFF;
 
   setMSynthParams(synthBase, p1, p2, p3, rDivEncoded, divBy4);
@@ -327,13 +324,13 @@ static void configurePLL(uint8_t pllBase, uint32_t vcoFreq) {
       ctrlVal &= ~intBit;
     }
     writeReg(ctrlRegAddr, ctrlVal);
-    setMSynthInt(pllBase, a, R_DIV_1); // PLL rDiv is always 1
+    setMSynthInt(pllBase, a, RDIV_1); // PLL rDiv is always 1
   } else {
     // Clear FBA_INT/FBB_INT bit for fractional mode
     uint8_t ctrlVal = readReg(ctrlRegAddr);
     ctrlVal &= ~intBit;
     writeReg(ctrlRegAddr, ctrlVal);
-    setMSynthFrac(pllBase, a, b, c, R_DIV_1); // PLL rDiv is always 1
+    setMSynthFrac(pllBase, a, b, c, RDIV_1); // PLL rDiv is always 1
   }
 
   resetPLLs();			/* XXX big hammer for now */
@@ -341,10 +338,15 @@ static void configurePLL(uint8_t pllBase, uint32_t vcoFreq) {
 
 // Configure an output stage (Multisynth, R divider, Clock Control)
 // 'drive' parameter is now uint8_t
-static void configureOutputSynth(uint8_t clkNumber, uint32_t outputFreq, uint32_t vcoFreq, bool usePLLA, uint8_t drive) {
+static void configureOutputSynth(uint8_t clkNumber,
+				 uint32_t outputFreq,
+				 uint32_t vcoFreq,
+				 bool usePLLA,
+				 uint8_t drive)
+{
   uint8_t msBase;
   uint8_t rDiv = 1;
-  uint8_t rDivEncoded = R_DIV_1; // Use uint8_t
+  uint8_t rDivEncoded = RDIV_1; // Use uint8_t
   uint8_t clkControlReg = REG_CLK_CONTROL_BASE + clkNumber;
   uint8_t clkCtrlVal = 0;
   bool isInteger = false;
@@ -386,7 +388,7 @@ static void configureOutputSynth(uint8_t clkNumber, uint32_t outputFreq, uint32_
   }
 
   // 3. Calculate Multisynth divider parameters (a, b, c or just integer div)
-  //    outputFreq = vcoFreq / (MS_Div * R_Div) => MS_Div = vcoFreq / (outputFreq * R_Div)
+  //    outputFreq = vcoFreq / (MS_Div * RDiv) => MS_Div = vcoFreq / (outputFreq * RDiv)
   //    Note: outputFreq was already multiplied by rDiv if rDiv > 1
   if (outputFreq == 0) return; // Avoid division by zero if adjusted outputFreq becomes 0
   uint64_t msDivx1M = (uint64_t)vcoFreq * 1000000ULL / outputFreq; // Calculate MS_Div * 1M for precision
