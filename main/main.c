@@ -30,6 +30,7 @@
 #include "cmd_nvs.h"
 #include "cmd_i2c.h"
 #include "cmd_freq.h"
+#include "cmd_drive.h"
 #include "console_settings.h"
 
 #include "esp_event.h"
@@ -353,6 +354,7 @@ void app_main(void)
   register_nvs();
   register_i2c();
   registerFREQ();
+  registerDRIVE();
 
   printf("\n"
 	 "Type 'help' to get the list of commands.\n"

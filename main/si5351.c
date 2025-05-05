@@ -18,7 +18,7 @@ extern i2c_master_dev_handle_t i2cDevH;
 #define MHZ(N)	((N)*1000*1000UL) // Use UL suffix for large constants
 #define KHZ(N)  ((N)*1000UL)
 
-static const uint32_t xtalFreq = MHZ(25);
+static const uint32_t xtalFreq = MHZ(26);
 static const uint32_t vcoMax = MHZ(900);
 
 // Total number of clocks in SI5351 we control.
