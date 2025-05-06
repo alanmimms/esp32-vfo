@@ -69,7 +69,7 @@ static int driveHandler(int argc, char **argv) {
     return 1;
   }
 
-  printf("%s: drive=%d (%dmA) clk=%d\n", TAG,
+  printf("  %s: drive=%d (%dmA) clk=%d\n", TAG,
 	 args.driveP->ival[0], enumToDrive(args.driveP->ival[0]), args.clkP->ival[0]);
   SI5351SetDrive(args.clkP->ival[0], args.driveP->ival[0]);
   return 0;
