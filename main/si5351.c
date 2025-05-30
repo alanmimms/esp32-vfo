@@ -324,12 +324,14 @@ static void configurePLL(uint8_t pllBase, uint32_t vcoFreq) {
       ctrlVal &= ~intBit;
     }
     writeReg(ctrlRegAddr, ctrlVal);
+    printf("configurePLL: integer a=%lu\n", a);
     setMSynthInt(pllBase, a, RDIV_1); // PLL rDiv is always 1
   } else {
     // Clear FBA_INT/FBB_INT bit for fractional mode
     uint8_t ctrlVal = readReg(ctrlRegAddr);
     ctrlVal &= ~intBit;
     writeReg(ctrlRegAddr, ctrlVal);
+    printf("configurePLL: fractional a=%lu  b=%lu  c=%lu\n", a, b, c);
     setMSynthFrac(pllBase, a, b, c, RDIV_1); // PLL rDiv is always 1
   }
 
@@ -416,6 +418,8 @@ static void configureOutputSynth(uint8_t clkNumber,
       c = 1;
     }
   }
+
+  printf("configureOutputSynth: a=%lu  b=%lu  c=%lu\n", a, b,c);
 
   // 4. Handle MS6/MS7 specific constraints (even integers 6-254)
   if (clkNumber >= 6) {
@@ -546,7 +550,7 @@ void SI5351SetFreq(uint8_t clkNumber, uint32_t f) {
   // Note: Lower limit depends on R divider, upper limit on silicon version/datasheet
   if (f < KHZ(8) || f > MHZ(160)) {
     // Log error or handle invalid frequency
-    // ESP_LOGE("SI5351", "Frequency %lu Hz out of range for CLK%d", f, clkNumber);
+    ESP_LOGE("SI5351", "Frequency %lu Hz out of range for CLK%d", f, clkNumber);
     return;
   }
 
