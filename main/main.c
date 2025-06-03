@@ -277,6 +277,7 @@ static void initI2C(void) {
 
 void app_main(void)
 {
+  printf("%s: [app_main]\n", TAG);
   initialize_nvs();
 
 #if CONFIG_CONSOLE_STORE_HISTORY
